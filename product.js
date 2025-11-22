@@ -10,6 +10,7 @@ const Product = mongoose.model(
     name: { type: String, required: true },
     SKUcode: { type: String, required: true },
     category:{ type: String, required: true },
+    location:{ type: String, default:"Main warehouse" },
     price:{type:Number,required:true},
     unit:{type: String},
     stock:{type:Number,default:0},
@@ -17,6 +18,26 @@ const Product = mongoose.model(
     updatedAt: { type: Date, default: Date.now },
   })
 );
+
+const Transfer = mongoose.model(
+  "Transfer",
+  new mongoose.Schema({
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+    from:{ type:String},
+    to:{ type: String},
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+  })
+);
+
+const Warehouse=mongoose.model(
+    "Warehouse",
+    new mongoose.Schema({
+        name:{type: String, required: true},
+        shortcode:{type: String, required: true},
+        address:{type: String, required: true}
+    })
+)
 
 const ReceiptProductSchema=new mongoose.Schema({
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
@@ -288,7 +309,7 @@ router.get("/orders/delivery", authenticateJWT, async (req, res) => {
 router.put("/delivery/:id", authenticateJWT, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid product ID" });
+      return res.status(400).json({ error: "Invalid delivery ID" });
     }
     const { deliveryStatus } = req.body;
     const delivery = await DeliveryOrder.findById(req.params.id);
@@ -302,5 +323,83 @@ router.put("/delivery/:id", authenticateJWT, async (req, res) => {
     res.status(500).json({ error: "Server connection error" });
   }
 });
+
+
+router.post("/warehouse", authenticateJWT, async (req, res) => {
+  try {
+    const { name,shortcode,address } = req.body;
+    if (!name || !shortcode)
+      res.status(400).json({ error: "Name and category needed" });
+    const warehouse = new Warehouse({
+      name: name,
+      shortcode:shortcode,
+      address:address
+    });
+    await warehouse.save();
+    res.status(200).json({ message: "Warehouse added succesfully", warehouse });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server connection error" });
+  }
+});
+
+router.get("/warehouses", authenticateJWT, async (req, res) => {
+  try {
+    const warehouses = await Warehouse.find().sort({
+      createdAt: -1,
+    });
+    res.json({
+      count: warehouses.length,
+      warehouses,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server connection error" });
+  }
+});
+
+router.post("/products/:id/transfer", authenticateJWT, async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
+    const { to } = req.body;
+    if (!to)
+      res.status(400).json({ error: "tranfer location needed" });
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: "product not found" });
+    
+    const transfer = new Transfer({
+      productId:product._id,
+      from:product.location,
+      to:to
+    });
+    if (to) product.location = to;
+    product.updatedAt = Date.now();
+    await product.save();
+    await transfer.save();
+    res.status(200).json({ message: "Transfered succesfully",transfer });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server connection error" });
+  }
+});
+
+router.get("/transfers", authenticateJWT, async (req, res) => {
+  try {
+    const transfers = await Transfer.find().sort({
+      createdAt: -1,
+    });
+    res.json({
+      count: transfers.length,
+      transfers,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server connection error" });
+  }
+});
+
+
 
 module.exports = { router, Product };
