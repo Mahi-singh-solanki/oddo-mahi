@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const { authenticateJWT } = require("./auth");
-const { object } = require("webidl-conversions");
 const router = express.Router();
 
 const Product = mongoose.model(

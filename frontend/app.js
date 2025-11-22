@@ -77,7 +77,8 @@ document.getElementById("auth-toggle").addEventListener("click", () => {
         btn.innerText = "Login";
         toggleText.innerText = "Sign Up";
     } else {
-        title.innerText = "Create Account";
+        
+        title.innerText = "Stocker Registration";
         emailInput.style.display = "block";
         btn.innerText = "Sign Up";
         toggleText.innerText = "Login";
@@ -304,9 +305,9 @@ function addOrderItem() {
     const name = document.getElementById("item-name").value;
     const cat = document.getElementById("item-category").value;
     const qty = document.getElementById("item-qty").value;
-    const price = document.getElementById("item-price").value;
+    const priceVal = document.getElementById("item-price").value; // Renamed variable to avoid confusion
 
-    if(!sku || !qty || !price) {
+    if(!sku || !qty || !priceVal) {
         alert("SKU, Quantity and Price are required");
         return;
     }
@@ -316,7 +317,8 @@ function addOrderItem() {
         name: name,
         category: cat,
         quantity: parseInt(qty),
-        unitPrice: parseFloat(price)
+        unitPrice: parseFloat(priceVal), // Used for the Receipt History
+        price: parseFloat(priceVal)      // <--- ADD THIS: Used for creating the new Product
     };
 
     orderItemsBuffer.push(item);
