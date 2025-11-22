@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stocker - Inventory Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="auth-section" class="auth-container">
+        <div class="auth-box">
+            <h1 id="auth-title">Stocker Login</h1>
+            <form id="auth-form">
+                <input type="text" id="auth-loginid" placeholder="Login ID" required>
+                <input type="email" id="auth-email" placeholder="Email (Signup only)" style="display:none;">
+                <input type="password" id="auth-password" placeholder="Password" required>
+                <button type="submit" id="auth-btn">Login</button>
+            </form>
+            <p id="auth-toggle">Don't have an account? <span>Sign Up</span></p>
+            <p id="auth-message"></p>
+        </div>
+    </div>
+
+    <div id="app-section" class="app-container" style="display: none;">
+        <nav class="sidebar">
+            <div class="brand">Stocker</div>
+            <div class="user-info" id="display-username">User</div>
+            <ul>
+                <li onclick="navTo('dashboard')">Dashboard</li>
+                <li onclick="navTo('products')">Products</li>
+                <li onclick="navTo('orders')">Orders (Receipts)</li>
+                <li onclick="navTo('deliveries')">Deliveries</li>
+                <li onclick="navTo('warehouses')">Warehouses</li>
+                <li onclick="navTo('transfers')">Transfers</li>
+                <li onclick="logout()" class="logout-btn">Logout</li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <div id="view-dashboard" class="view active">
+                <h2>Dashboard Overview</h2>
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3>Total Products</h3>
+                        <p id="dash-prod-count">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Total Orders</h3>
+                        <p id="dash-order-count">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Warehouses</h3>
+                        <p id="dash-warehouse-count">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-products" class="view">
+                <div class="header-actions">
+                    <h2>Products</h2>
+                    <div style="display: flex; gap: 10px;">
+            <input type="text" id="search-sku" placeholder="Search by SKU Code..." 
+                   style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 250px;">
+            <button onclick="openModal('modal-add-product')">+ Add Product</button>
+        </div>
+                </div>
+                <div class="table-container">
+                    <table id="products-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>SKU</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Location</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-orders" class="view">
+                <div class="header-actions">
+                    <h2>Order Receipts</h2>
+                    <button onclick="openModal('modal-create-order')">+ Create Order</button>
+                </div>
+                <div class="table-container">
+                    <table id="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Type</th>
+                                <th>Supplier</th>
+                                <th>Total Amount</th>
+                                <th>Items</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-deliveries" class="view">
+                <h2>Delivery Status</h2>
+                <div class="table-container">
+                    <table id="deliveries-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Recipient</th>
+                                <th>Address</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+             <div id="view-warehouses" class="view">
+                <div class="header-actions">
+                    <h2>Warehouses</h2>
+                    <button onclick="openModal('modal-add-warehouse')">+ Add Warehouse</button>
+                </div>
+                <div class="table-container">
+                    <table id="warehouses-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Shortcode</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-transfers" class="view">
+                <h2>Stock Transfers</h2>
+                <div class="table-container">
+                    <table id="transfers-table">
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-add-product" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('modal-add-product')">&times;</span>
+            <h3>Add New Product</h3>
+            <form id="form-add-product">
+                <input type="text" name="name" placeholder="Product Name" required>
+                <input type="text" name="SKUcode" placeholder="SKU Code" required>
+                <input type="text" name="category" placeholder="Category" required>
+                <input type="number" name="price" placeholder="Price" required>
+                <button type="submit">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-transfer-product" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('modal-transfer-product')">&times;</span>
+            <h3>Transfer Stock</h3>
+            <form id="form-transfer-product">
+                <input type="hidden" id="transfer-prod-id">
+                <p>Moving Product: <span id="transfer-prod-name" style="font-weight:bold;"></span></p>
+                <label>Destination:</label>
+                <input type="text" id="transfer-to" placeholder="e.g., Warehouse B" required>
+                <button type="submit">Confirm Transfer</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-add-warehouse" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('modal-add-warehouse')">&times;</span>
+            <h3>Add Warehouse</h3>
+            <form id="form-add-warehouse">
+                <input type="text" name="name" placeholder="Warehouse Name" required>
+                <input type="text" name="shortcode" placeholder="Shortcode (e.g., WH1)" required>
+                <input type="text" name="address" placeholder="Address" required>
+                <button type="submit">Save Warehouse</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-create-order" class="modal">
+        <div class="modal-content large">
+            <span class="close" onclick="closeModal('modal-create-order')">&times;</span>
+            <h3>Create New Order</h3>
+            <form id="form-create-order">
+                <div class="form-row">
+                    <input type="number" id="order-no" placeholder="Order No." required>
+                    <input type="text" id="order-supplier" placeholder="Supplier Name" required>
+                </div>
+                <div class="form-row">
+                    <select id="order-type" onchange="toggleDeliveryFields()">
+                        <option value="received">Received (Purchase)</option>
+                        <option value="sent">Sent (Sales)</option>
+                    </select>
+                </div>
+
+                <div id="delivery-fields" style="display:none; background:#f9f9f9; padding:10px; margin-bottom:10px;">
+                    <h4>Shipping Info</h4>
+                    <input type="text" id="order-recipient" placeholder="Recipient Name">
+                    <input type="text" id="order-address" placeholder="Shipping Address">
+                </div>
+
+                <div style="border-top:1px solid #eee; padding-top:10px; margin-top:10px;">
+                    <h4>Add Items</h4>
+                    <div class="form-row">
+                        <input type="text" id="item-sku" placeholder="SKU Code">
+                        <input type="text" id="item-name" placeholder="Name (New Products)">
+                        <input type="text" id="item-category" placeholder="Cat (New Products)">
+                    </div>
+                    <div class="form-row">
+                        <input type="number" id="item-qty" placeholder="Qty">
+                        <input type="number" id="item-price" placeholder="Unit Price">
+                        <button type="button" onclick="addOrderItem()" class="secondary-btn">Add Item</button>
+                    </div>
+                </div>
+
+                <ul id="order-items-list"></ul>
+                
+                <button type="submit" style="margin-top:15px;">Submit Order</button>
+            </form>
+        </div>
+    </div>
+    <div id="modal-update-stock" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('modal-update-stock')">&times;</span>
+        <h3>Update Stock Level</h3>
+        <form id="form-update-stock">
+            <input type="hidden" id="update-id">
+            <p>Product: <span id="update-name" style="font-weight:bold;"></span></p>
+            <label>New Stock Quantity:</label>
+            <input type="number" id="update-stock-qty" placeholder="Enter new total stock" required min="0">
+            <button type="submit">Update Stock</button>
+        </form>
+    </div>
+</div>
+
+    <script src="app.js"></script>
+</body>
+</html>
