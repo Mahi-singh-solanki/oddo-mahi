@@ -13,7 +13,7 @@ app.use(authRoutes);
 app.use(prodRoutes);
 
 mongoose.connect(
-  "your url"
+  "mongodb+srv://mahipalsinghapsit0:msdonrajputana@cluster0.am95irj.mongodb.net/stocker"
 ).then(() => console.log('MongoDB connected successfully!'))
 .catch(err => console.error('MongoDB connection error:', err));
 
