@@ -1,5 +1,5 @@
 // CONFIGURATION
-const API_BASE = "http://localhost:8080";
+const API_BASE = "https://oddo-mahi.onrender.com";
 let currentToken = localStorage.getItem("token");
 let currentUser = null;
 let orderItemsBuffer = []; // Stores items temporarily for the Order Creation form
