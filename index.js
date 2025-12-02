@@ -4,7 +4,7 @@ const cors = require("cors");
 const body_parser = require("body-parser");
 
 const app = express();
-app.use(cors({ origin: "stocker-odoo.netlify.app" }));
+app.use(cors({ origin: "https://stocker-odoo.netlify.app" }));
 app.use(body_parser.json());
 
 const { router: authRoutes, authenticateJWT } = require("./auth");
